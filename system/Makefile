@@ -41,6 +41,7 @@ SRC_FILES += \
   $(PROJ_DIR)/source/main.cpp \
   $(PROJ_DIR)/source/drivers/I2CMaster.cpp \
   $(PROJ_DIR)/source/drivers/UART.cpp \
+  $(PROJ_DIR)/source/drivers/SPIMaster.cpp \
   $(SDK_ROOT)/external/segger_rtt/RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \

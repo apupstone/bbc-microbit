@@ -4,13 +4,14 @@
 #include "nrf51.h"
 #include "nrf51_bitfields.h"
 #include <stdint.h>
+#include "CircularBuffer.h"
 
 
 static const uint8_t SPI_TX_BUFFER_SIZE = 64;
 static const uint8_t SPI_RX_BUFFER_SIZE = 64;
 
 
-enum class SPIFrequency
+enum class SPIFrequency: uint32_t
 {
 	K125 = 0x02000000,
 	K250 = 0x04000000,
@@ -46,8 +47,8 @@ struct SPIConfig
 static const SPIConfig spi1_config = 
 {
 	NRF_SPI1,
-	M1,
-	MODE0,
+	SPIFrequency::M1,
+	SPIMode::MODE0,
 	false,
 	23,
 	21,
@@ -55,24 +56,30 @@ static const SPIConfig spi1_config =
 };
 
 
+struct SPIRxData
+{
+	uint8_t data[SPI_RX_BUFFER_SIZE];
+	uint16_t length;
+};
+
+
 class SPIMaster
 {
 	public:
 		SPIMaster(const SPIConfig& conf);
-		void write(uint8_t address, const uint8_t* data, uint8_t length, bool repeated_start=false);
-		void read(uint8_t address, uint8_t* data, uint8_t length);
+		void write(const uint8_t* data, uint16_t length, void (* callback)());
+		uint16_t read(uint8_t* data, void (* callback)(SPIRxData));
 		void isr();
 		bool busy() { return m_busy; }
 		
 	private:
 		const SPIConfig& m_conf;
-		bool m_repeated_start;
-		uint8_t m_tx_buffer[SPI_TX_BUFFER_SIZE];
-		uint8_t m_tx_length;
-		uint8_t* m_tx_pointer;
+		
+		CircularBuffer<uint8_t> m_tx_buffer;
+		CircularBuffer<uint8_t> m_rx_buffer;
+		
 		uint8_t m_rx_length;
-		uint8_t* m_rx_base;
-		uint8_t* m_rx_pointer;
+		
 		volatile bool m_busy;
 };
 

@@ -55,7 +55,6 @@ void I2CMaster::write(uint8_t address, const uint8_t* data, uint8_t length, void
 	for (uint8_t i = 0; i < length; i++)
 	{
 		m_tx_buffer.put(data[i]);
-		//m_tx_buffer[i] = data[i];
 	}
 	
 	m_busy = true;
@@ -71,7 +70,6 @@ void I2CMaster::write(uint8_t address, const uint8_t* data, uint8_t length, void
 	{
 		m_conf.periph->TXD = tx_byte;
 	}
-	//m_conf.periph->TXD = *m_tx_pointer++;
 }
 
 
