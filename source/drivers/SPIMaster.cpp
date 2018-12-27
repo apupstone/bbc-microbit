@@ -6,10 +6,27 @@ extern "C" void SPI1_TWI1_IRQHandler(void);
 
 
 SPIMaster::SPIMaster(const SPIConfig& conf)
-: m_conf(conf), m_tx_buffer(SPI_TX_BUFFER_SIZE), m_rx_buffer(SPI_RX_BUFFER_SIZE), m_rx_length(0), m_busy(false)
+: m_conf(conf), m_tx_buffer(SPI_TX_BUFFER_SIZE), m_rx_buffer(SPI_RX_BUFFER_SIZE), m_rx_length(0), m_cur_cs(0xFFFFFFFF), m_busy(false)
 {
 	// Disable the SPI peripheral before configuring it
 	m_conf.periph->ENABLE = SPI_ENABLE_ENABLE_Disabled;
+	
+	m_conf.periph->FREQUENCY = (uint32_t)m_conf.frequency;
+	
+	// Configure pins for correct behaviour when the SPI peripheral is disabled
+	NRF_GPIO->DIRSET = (1 << m_conf.pin_sck);
+	NRF_GPIO->OUTSET = (1 << m_conf.pin_sck);
+	NRF_GPIO->DIRSET = (1 << m_conf.pin_mosi);
+	NRF_GPIO->OUTSET = (1 << m_conf.pin_mosi);
+	NRF_GPIO->DIRCLR = (1 << m_conf.pin_miso);
+	
+	m_conf.periph->PSELSCK = m_conf.pin_sck;
+	m_conf.periph->PSELMOSI = m_conf.pin_mosi;
+	m_conf.periph->PSELMISO = m_conf.pin_miso;
+	
+	// Set up CONFIG register
+	m_conf.periph->CONFIG = (((m_conf.lsb_first ? SPI_CONFIG_ORDER_LsbFirst : SPI_CONFIG_ORDER_MsbFirst) << SPI_CONFIG_ORDER_Pos) & SPI_CONFIG_ORDER_Msk) |
+							(((uint32_t)m_conf.mode << SPI_CONFIG_CPHA_Pos) & (SPI_CONFIG_CPHA_Msk | SPI_CONFIG_CPOL_Msk));
 	
 	// Enable interrupt sources
 	m_conf.periph->INTENSET = SPI_INTENSET_READY_Msk;
@@ -23,21 +40,44 @@ SPIMaster::SPIMaster(const SPIConfig& conf)
 }
 
 
-void SPIMaster::write(const uint8_t* data, uint16_t length, void (* callback)())
+void SPIMaster::write(const uint8_t* data, uint16_t length, void (* callback)(), uint32_t pin_cs, uint32_t pin_dc, bool dc)
 {
 	for (uint16_t i = 0; i < length; i++)
 	{
-		m_tx_buffer.put(data[i]);
+		SPITxData tx_data = 
+		{
+			data[i],
+			pin_cs,
+			pin_dc,
+			dc
+		};
+	
+		m_tx_buffer.put(tx_data);
 	}
 	
 	if (!m_busy)
 	{
-		uint8_t tx_byte;
-		if (m_tx_buffer.get(&tx_byte))
+		SPITxData tx_data;
+		if (m_tx_buffer.get(&tx_data))
 		{
 			m_busy = true;
+			
+			// Assert low CS
+			NRF_GPIO->OUTCLR = (1 << tx_data.pin_cs);
+			
+			if (tx_data.dc)
+			{
+				// Assert high DC
+				NRF_GPIO->OUTSET = (1 << tx_data.pin_dc);
+			}
+			else
+			{
+				// Deassert low DC
+				NRF_GPIO->OUTCLR = (1 << tx_data.pin_dc);
+			}
+			
 			// Write next byte into the TXD register
-			m_conf.periph->TXD = tx_byte;
+			m_conf.periph->TXD = tx_data.data;
 		}
 	}
 }
@@ -60,14 +100,40 @@ void SPIMaster::isr()
 		// Read received byte from the RXD register
 		m_rx_buffer.put(m_conf.periph->RXD);
 	
-		uint8_t tx_byte;
-		if (m_tx_buffer.get(&tx_byte))
+		SPITxData tx_data;
+		if (m_tx_buffer.get(&tx_data))
 		{
+			m_busy = true;
+			
+			if (m_cur_cs != tx_data.pin_cs)
+			{
+				// Deassert high CS
+				NRF_GPIO->OUTSET = (1 << m_cur_cs);
+			}
+			
+			// Assert low CS
+			m_cur_cs = tx_data.pin_cs;
+			NRF_GPIO->OUTCLR = (1 << tx_data.pin_cs);
+			
+			if (tx_data.dc)
+			{
+				// Assert high DC
+				NRF_GPIO->OUTSET = (1 << tx_data.pin_dc);
+			}
+			else
+			{
+				// Deassert low DC
+				NRF_GPIO->OUTCLR = (1 << tx_data.pin_dc);
+			}
+			
 			// Write next byte into the TXD register
-			m_conf.periph->TXD = tx_byte;
+			m_conf.periph->TXD = tx_data.data;
 		}
 		else
 		{
+			// Deassert high CS
+			NRF_GPIO->OUTSET = (1 << m_cur_cs);
+			
 			m_busy = false;
 		}
 	

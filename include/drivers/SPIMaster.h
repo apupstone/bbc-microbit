@@ -56,6 +56,15 @@ static const SPIConfig spi1_config =
 };
 
 
+struct SPITxData
+{
+	uint8_t data;
+	uint32_t pin_cs;
+	uint32_t pin_dc;
+	bool dc;
+};
+
+
 struct SPIRxData
 {
 	uint8_t data[SPI_RX_BUFFER_SIZE];
@@ -67,7 +76,7 @@ class SPIMaster
 {
 	public:
 		SPIMaster(const SPIConfig& conf);
-		void write(const uint8_t* data, uint16_t length, void (* callback)());
+		void write(const uint8_t* data, uint16_t length, void (* callback)(), uint32_t pin_cs, uint32_t pin_dc=0xFFFFFFFF, bool dc=false);
 		uint16_t read(uint8_t* data, void (* callback)(SPIRxData));
 		void isr();
 		bool busy() { return m_busy; }
@@ -75,11 +84,12 @@ class SPIMaster
 	private:
 		const SPIConfig& m_conf;
 		
-		CircularBuffer<uint8_t> m_tx_buffer;
+		CircularBuffer<SPITxData> m_tx_buffer;
 		CircularBuffer<uint8_t> m_rx_buffer;
 		
 		uint8_t m_rx_length;
 		
+		uint32_t m_cur_cs;
 		volatile bool m_busy;
 };
 

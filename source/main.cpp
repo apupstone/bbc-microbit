@@ -3,6 +3,7 @@
 #include "task.h"
 #include "I2CMaster.h"
 #include "UART.h"
+#include "SPIMaster.h"
 
 
 #define COL1 4
@@ -36,6 +37,12 @@ void I2CTxCallback()
 }
 
 
+void SPICallback()
+{
+	return;
+}
+
+
 void task_1(void *pvParameters)
 {
 	volatile bool led1_status = false;
@@ -43,7 +50,8 @@ void task_1(void *pvParameters)
 	//uint8_t whoami_reg = 0x0D;
 	//uint8_t whoami = 0;
 	
-	uint8_t data[64] = {0};
+	//uint8_t data[64] = {0};
+	uint8_t data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	
 	for(;;)
 	{
@@ -60,8 +68,10 @@ void task_1(void *pvParameters)
 		
 		vTaskDelay(pdMS_TO_TICKS(500));
 		
-		uint16_t rx_length = uart0().read(&data[0], 64);
-		uart0().write(&data[0], rx_length);
+		//uint16_t rx_length = uart0().read(&data[0], 64);
+		//uart0().write(&data[0], rx_length);
+		
+		spi1().write(&data[0], 10, SPICallback, 1, 2, false);
 	}
 }
 
