@@ -4,6 +4,7 @@
 #include "I2CMaster.h"
 #include "UART.h"
 #include "SPIMaster.h"
+#include "LCDDisplay.h"
 
 
 #define COL1 4
@@ -46,12 +47,13 @@ void SPICallback()
 void task_1(void *pvParameters)
 {
 	volatile bool led1_status = false;
+	volatile uint8_t current_image = 0;
 
 	//uint8_t whoami_reg = 0x0D;
 	//uint8_t whoami = 0;
 	
 	//uint8_t data[64] = {0};
-	uint8_t data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	//uint8_t data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	
 	for(;;)
 	{
@@ -66,12 +68,33 @@ void task_1(void *pvParameters)
 			led1_status = true;
 		}
 		
-		vTaskDelay(pdMS_TO_TICKS(500));
+		if (current_image == 0)
+		{
+			lcd().draw_bbc();
+			current_image = 1;
+		}
+		else if (current_image == 1)
+		{
+			lcd().draw_microbit();
+			current_image = 2;
+		}
+		else if (current_image == 2)
+		{
+			lcd().draw_alexander();
+			current_image = 3;
+		}
+		else if (current_image == 3)
+		{
+			lcd().draw_red();
+			current_image = 0;
+		}
+		
+		vTaskDelay(pdMS_TO_TICKS(2000));
 		
 		//uint16_t rx_length = uart0().read(&data[0], 64);
 		//uart0().write(&data[0], rx_length);
 		
-		spi1().write(&data[0], 10, SPICallback, 1, 2, false);
+		//spi1().write(&data[0], 10, SPICallback, 1, 2, false);
 	}
 }
 

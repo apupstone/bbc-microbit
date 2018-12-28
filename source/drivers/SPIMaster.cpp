@@ -40,8 +40,13 @@ SPIMaster::SPIMaster(const SPIConfig& conf)
 }
 
 
-void SPIMaster::write(const uint8_t* data, uint16_t length, void (* callback)(), uint32_t pin_cs, uint32_t pin_dc, bool dc)
+bool SPIMaster::write(const uint8_t* data, uint16_t length, void (* callback)(), uint32_t pin_cs, uint32_t pin_dc, bool dc)
 {
+	if (m_tx_buffer.get_capacity() - m_tx_buffer.get_size() < length)
+	{
+		return false;
+	}
+
 	for (uint16_t i = 0; i < length; i++)
 	{
 		SPITxData tx_data = 
@@ -80,16 +85,18 @@ void SPIMaster::write(const uint8_t* data, uint16_t length, void (* callback)(),
 			m_conf.periph->TXD = tx_data.data;
 		}
 	}
+	
+	return true;
 }
 
 
-uint16_t SPIMaster::read(uint8_t* data, void (* callback)(SPIRxData))
+void SPIMaster::read(void (* callback)(SPIRxData))
 {
-	uint16_t length = 0;
+	SPIRxData rx_data;
 	
-	while (m_rx_buffer.get(&data[length++]));
+	while (m_rx_buffer.get(&rx_data.data[rx_data.length++]));
 	
-	return length;
+	callback(rx_data);
 }
 
 

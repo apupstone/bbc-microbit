@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-static const uint16_t CIRCULAR_BUFFER_MAX_CAPACITY = 64;
+static const uint16_t CIRCULAR_BUFFER_MAX_CAPACITY = 256;
 
 template <class T>
 class CircularBuffer

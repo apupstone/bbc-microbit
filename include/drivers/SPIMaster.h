@@ -7,8 +7,8 @@
 #include "CircularBuffer.h"
 
 
-static const uint8_t SPI_TX_BUFFER_SIZE = 64;
-static const uint8_t SPI_RX_BUFFER_SIZE = 64;
+static const uint16_t SPI_TX_BUFFER_SIZE = 1024;
+static const uint16_t SPI_RX_BUFFER_SIZE = 64;
 
 
 enum class SPIFrequency: uint32_t
@@ -47,7 +47,7 @@ struct SPIConfig
 static const SPIConfig spi1_config = 
 {
 	NRF_SPI1,
-	SPIFrequency::M1,
+	SPIFrequency::M8,
 	SPIMode::MODE0,
 	false,
 	23,
@@ -76,8 +76,8 @@ class SPIMaster
 {
 	public:
 		SPIMaster(const SPIConfig& conf);
-		void write(const uint8_t* data, uint16_t length, void (* callback)(), uint32_t pin_cs, uint32_t pin_dc=0xFFFFFFFF, bool dc=false);
-		uint16_t read(uint8_t* data, void (* callback)(SPIRxData));
+		bool write(const uint8_t* data, uint16_t length, void (* callback)(), uint32_t pin_cs, uint32_t pin_dc=0xFFFFFFFF, bool dc=false);
+		void read(void (* callback)(SPIRxData));
 		void isr();
 		bool busy() { return m_busy; }
 		
@@ -87,7 +87,7 @@ class SPIMaster
 		CircularBuffer<SPITxData> m_tx_buffer;
 		CircularBuffer<uint8_t> m_rx_buffer;
 		
-		uint8_t m_rx_length;
+		uint16_t m_rx_length;
 		
 		uint32_t m_cur_cs;
 		volatile bool m_busy;
