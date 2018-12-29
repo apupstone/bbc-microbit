@@ -5,8 +5,10 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x0, LENGTH = 0x40000
-  RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 0x4000
+  /*FLASH (rx) : ORIGIN = 0x0, LENGTH = 0x40000*/
+  FLASH (rx) : ORIGIN = 0x0001B000, LENGTH = 0x25000 /* SoftDevice S130 uses 0x1B000 bytes at start of Flash */
+  /*RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 0x4000*/
+  RAM (rwx) : ORIGIN = 0x20001FE8, LENGTH = 0x2018 /* SoftDevice S130 uses at least 0x13C8 bytes at start of RAM */
 }
 
 SECTIONS

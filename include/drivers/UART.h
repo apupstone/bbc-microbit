@@ -46,7 +46,7 @@ static const UARTConfig uart0_config =
 {
 	NRF_UART0,
 	UARTBaudRate::Baud9600,
-	18, //25,
+	25,
 	24
 };
 

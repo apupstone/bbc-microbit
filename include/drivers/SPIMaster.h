@@ -7,7 +7,7 @@
 #include "CircularBuffer.h"
 
 
-static const uint16_t SPI_TX_BUFFER_SIZE = 1024;
+static const uint16_t SPI_TX_BUFFER_SIZE = 64;
 static const uint16_t SPI_RX_BUFFER_SIZE = 64;
 
 

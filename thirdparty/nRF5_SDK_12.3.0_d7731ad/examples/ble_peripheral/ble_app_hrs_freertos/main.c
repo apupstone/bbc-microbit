@@ -1131,6 +1131,20 @@ int main(void)
     }
 #endif //NRF_LOG_ENABLED
 
+#ifdef BOARD_BBC_MICROBIT
+	// Set all LED rows and columns as outputs
+	NRF_GPIO->DIRSET = (1 << COL1) | (1 << COL2) | (1 << COL3) | (1 << COL4) | (1 << COL5) | (1 << COL6) | (1 << COL7) | (1 << COL8) | (1 << COL9) | (1 << ROW1) | (1 << ROW2) | (1 << ROW3);
+	
+	// Clear column 1
+	NRF_GPIO->OUTCLR = (1 << COL1);
+	
+	// Set all other columns
+	NRF_GPIO->OUTSET = (1 << COL2) | (1 << COL3) | (1 << COL4) | (1 << COL5) | (1 << COL6) | (1 << COL7) | (1 << COL8) | (1 << COL9);
+
+	// Clear all rows
+	NRF_GPIO->OUTCLR = (1 << ROW1) | (1 << ROW2) | (1 << ROW3);
+#endif
+
     /* Activate deep sleep mode */
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 

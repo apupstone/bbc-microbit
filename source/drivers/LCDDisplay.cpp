@@ -1,7 +1,6 @@
 #include "LCDDisplay.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "UART.h"
 
 
 void DataIgnorer(SPIRxData rx_data)
@@ -88,7 +87,7 @@ void LCDDisplay::draw_bbc()
 	column_address_set(2, 129);
 	row_address_set(1, 128);
 
-	ram_write(&bbc[0], HEIGHT * WIDTH * 3);
+	//ram_write(&bbc[0], HEIGHT * WIDTH * 3);
 }
 
 
@@ -106,16 +105,16 @@ void LCDDisplay::draw_alexander()
 	column_address_set(2, 129);
 	row_address_set(1, 128);
 
-	ram_write(&alexander[0], HEIGHT * WIDTH * 3);
+	//ram_write(&alexander[0], HEIGHT * WIDTH * 3);
 }
 
 
 void LCDDisplay::draw_red()
 {
-	column_address_set(2, 129);
+	/*column_address_set(2, 129);
 	row_address_set(1, 128);
 
-	ram_write(&red[0], HEIGHT * WIDTH * 3);
+	ram_write(&red[0], HEIGHT * WIDTH * 3);*/
 }
 
 
@@ -225,20 +224,12 @@ void LCDDisplay::row_address_set(uint16_t y_start, uint16_t y_end)
 
 void LCDDisplay::ram_write(const uint8_t* wr_data, uint16_t length)
 {
-	char debug_info[64] = {0};
-
 	uint8_t data[1] = {0x2C};
 	m_conf.spi_periph.write(&data[0], sizeof(data), lcd_callback, m_conf.pin_cs, m_conf.pin_dc, false);
 	for (uint16_t i = 0; i < length; i++)
 	{
 		// Keep attempting to write (returns false if SPI transmit buffer is currently full)
 		while (!m_conf.spi_periph.write(&wr_data[i], 1, lcd_callback, m_conf.pin_cs, m_conf.pin_dc, true));
-		
-		if ((i % 100000) == 0)
-		{
-			sprintf(&debug_info[0], "%d\n", i);
-			uart0().write((uint8_t *)&debug_info[0], sizeof(debug_info));
-		}
 	}
 }
 

@@ -24,6 +24,8 @@ UART::UART(const UARTConfig& conf)
 	// Enable interrupt sources
 	m_conf.periph->INTENSET = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_TXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
 	
+	sd_nvic_SetPriority((IRQn_Type)(((uint32_t)m_conf.periph & 0x0000FFFF) >> 12), 1);
+	
 	// Enable interrupt in the NVIC
 	// Must use sd_nvic_EnableIRQ to play nicely with the SoftDevice
 	sd_nvic_EnableIRQ((IRQn_Type)(((uint32_t)m_conf.periph & 0x0000FFFF) >> 12));

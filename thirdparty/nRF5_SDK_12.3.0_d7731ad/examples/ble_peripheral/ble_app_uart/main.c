@@ -630,6 +630,20 @@ int main(void)
     advertising_init();
     conn_params_init();
 
+#ifdef BOARD_BBC_MICROBIT
+	// Set all LED rows and columns as outputs
+	NRF_GPIO->DIRSET = (1 << COL1) | (1 << COL2) | (1 << COL3) | (1 << COL4) | (1 << COL5) | (1 << COL6) | (1 << COL7) | (1 << COL8) | (1 << COL9) | (1 << ROW1) | (1 << ROW2) | (1 << ROW3);
+	
+	// Clear column 1
+	NRF_GPIO->OUTCLR = (1 << COL1);
+	
+	// Set all other columns
+	NRF_GPIO->OUTSET = (1 << COL2) | (1 << COL3) | (1 << COL4) | (1 << COL5) | (1 << COL6) | (1 << COL7) | (1 << COL8) | (1 << COL9);
+
+	// Clear all rows
+	NRF_GPIO->OUTCLR = (1 << ROW1) | (1 << ROW2) | (1 << ROW3);
+#endif
+	
     printf("\r\nUART Start!\r\n");
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);

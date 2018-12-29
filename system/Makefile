@@ -46,8 +46,15 @@ SRC_FILES += \
   $(SDK_ROOT)/external/segger_rtt/RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
+  $(SDK_ROOT)/components/ble/common/ble_advdata.c \
+  $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
+  $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
+  $(SDK_ROOT)/components/ble/common/ble_srv_common.c \
   $(SDK_ROOT)/components/toolchain/gcc/gcc_startup_nrf51.S \
   $(SDK_ROOT)/components/toolchain/system_nrf51.c \
+  $(SDK_ROOT)/components/ble/ble_services/ble_nus/ble_nus.c \
+  $(SDK_ROOT)/components/softdevice/common/softdevice_handler/softdevice_handler.c \
+  $(SDK_ROOT)/components/libraries/fstorage/fstorage.c \
 
 # Include folders common to all targets
 INC_FOLDERS += \
@@ -66,10 +73,11 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/log \
   $(SDK_ROOT)/components/libraries/button \
   $(SDK_ROOT)/components/libraries/timer \
+  $(SDK_ROOT)/components/libraries/fstorage \
+  $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/external/freertos/portable/CMSIS/nrf51 \
   $(SDK_ROOT)/components/drivers_nrf/gpiote \
   $(SDK_ROOT)/external/segger_rtt \
-  $(SDK_ROOT)/components/drivers_nrf/nrf_soc_nosd \
   ../config \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/drivers_nrf/hal \
@@ -78,7 +86,13 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/drivers_nrf/common \
   $(SDK_ROOT)/components/drivers_nrf/clock \
   $(SDK_ROOT)/external/freertos/portable/GCC/nrf51 \
+  $(SDK_ROOT)/components/softdevice/common/softdevice_handler \
+  $(SDK_ROOT)/components/softdevice/s130/headers \
+  $(SDK_ROOT)/components/softdevice/s130/headers/nrf51 \
   $(SDK_ROOT)/components/libraries/log/src \
+  $(SDK_ROOT)/components/ble/ble_advertising \
+  $(SDK_ROOT)/components/ble/common \
+  $(SDK_ROOT)/components/ble/ble_services/ble_nus \
 
 # Libraries common to all targets
 LIB_FILES += \
@@ -87,7 +101,13 @@ LIB_FILES += \
 CFLAGS += -DNRF51
 CFLAGS += -DNRF51822
 CFLAGS += -DFREERTOS
-CFLAGS += -DBOARD_PCA10028
+CFLAGS += -DBLE_STACK_SUPPORT_REQD
+CFLAGS += -D__STACK_SIZE=512
+CFLAGS += -D__HEAP_SIZE=128
+CFLAGS += -DNRF_SD_BLE_API_VERSION=2
+CFLAGS += -DSOFTDEVICE_PRESENT
+CFLAGS += -DS130
+CFLAGS += -DBOARD_BBC_MICROBIT
 CFLAGS += -mcpu=cortex-m0
 CFLAGS += -mthumb -mabi=aapcs
 CFLAGS +=  -Wall -Werror -O3 -g3
@@ -100,7 +120,10 @@ CFLAGS += -fno-builtin --short-enums
 CXXFLAGS += -DNRF51
 CXXFLAGS += -DNRF51822
 CXXFLAGS += -DFREERTOS
-CXXFLAGS += -DBOARD_PCA10028
+CXXFLAGS += -DBLE_STACK_SUPPORT_REQD
+CXXFLAGS += -D__STACK_SIZE=512
+CXXFLAGS += -D__HEAP_SIZE=128
+CXXFLAGS += -DBOARD_BBC_MICROBIT
 CXXFLAGS += -mcpu=cortex-m0
 CXXFLAGS += -mthumb -mabi=aapcs
 CXXFLAGS +=  -Wall -Werror -O3 -g3
@@ -115,7 +138,13 @@ ASMFLAGS += -x assembler-with-cpp
 ASMFLAGS += -DNRF51
 ASMFLAGS += -DNRF51822
 ASMFLAGS += -DFREERTOS
-ASMFLAGS += -DBOARD_PCA10028
+ASMFLAGS += -DBOARD_BBC_MICROBIT
+ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
+ASMFLAGS += -DNRF_SD_BLE_API_VERSION=2
+ASMFLAGS += -DSOFTDEVICE_PRESENT
+ASMFLAGS += -D__STACK_SIZE=512
+ASMFLAGS += -D__HEAP_SIZE=128
+ASMFLAGS += -DS130
 
 # Linker flags
 LDFLAGS += -mthumb -mabi=aapcs -L $(TEMPLATE_PATH) -T$(LINKER_SCRIPT)

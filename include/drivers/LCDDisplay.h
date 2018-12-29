@@ -4,10 +4,10 @@
 #include "nrf51.h"
 #include <stdint.h>
 #include "SPIMaster.h"
-#include "bbc.h"
+//#include "bbc.h"
 #include "microbit.h"
-#include "alexander.h"
-#include "red.h"
+//#include "alexander.h"
+//#include "red.h"
 
 
 static const uint16_t WIDTH = 128;
