@@ -24,6 +24,8 @@ I2CMaster::I2CMaster(const I2CConfig& conf)
 	// Enable interrupt sources
 	m_conf.periph->INTENSET = TWI_INTENSET_STOPPED_Msk | TWI_INTENSET_RXDREADY_Msk | TWI_INTENSET_TXDSENT_Msk | TWI_INTENSET_ERROR_Msk | TWI_INTENSET_BB_Msk;
 	
+	sd_nvic_SetPriority((IRQn_Type)(((uint32_t)m_conf.periph & 0x0000FFFF) >> 12), 1);
+	
 	// Enable interrupt in the NVIC
 	// Must use sd_nvic_EnableIRQ to play nicely with the SoftDevice
 	// e.g. TWI0 base is 0x40003000

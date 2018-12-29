@@ -55,9 +55,6 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-#define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
-
 static ble_nus_t                        m_nus;                                      /**< Structure to identify the Nordic UART Service. */
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 
@@ -73,7 +70,6 @@ static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, 
 #define COL7 10
 #define COL8 11
 #define COL9 12
-
 
 #define ROW1 13
 #define ROW2 14
@@ -111,16 +107,6 @@ void SPICallback()
 void task_1(void *pvParameters)
 {
 	volatile bool led1_status = false;
-	//volatile uint8_t current_image = 0;
-
-	//uint8_t whoami_reg = 0x0D;
-	//uint8_t whoami = 0;
-	
-	//uint8_t data[64] = {0};
-	//uint8_t data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	
-	//uint16_t hello_count = 0;
-	//char hello_world[30] = {0};
 	
 	for(;;)
 	{
@@ -135,51 +121,21 @@ void task_1(void *pvParameters)
 			led1_status = true;
 		}
 		
-		/*if (current_image == 0)
-		{
-			lcd().draw_bbc();
-			current_image = 1;
-		}
-		else if (current_image == 1)
-		{*/
-			//lcd().draw_microbit();
-			//current_image = 2;
-		/*}
-		else if (current_image == 2)
-		{
-			lcd().draw_alexander();
-			current_image = 0;
-		}
-		else if (current_image == 3)
-		{
-			lcd().draw_red();
-			current_image = 0;
-		}*/
-		
 		vTaskDelay(pdMS_TO_TICKS(10));
 		
-		//uint16_t rx_length = uart0().read(&data[0], 64);
-		//uart0().write(&data[0], rx_length);
-		
-		//sprintf(&hello_world[0], "Hello, World! %d\r\n", hello_count++);
-		//uart0().write((uint8_t *)&hello_world[0], sizeof(hello_world));
-		
 		uart_event_handle();
-		
-		//spi1().write(&data[0], 10, SPICallback, 1, 2, false);
 	}
 }
 
 
 void task_2(void *pvParameters)
 {
-	volatile bool led2_status = false;
+	bool led2_status = false;
 	
 	uint8_t x_reg = 0x01;
 	uint8_t ctrl_reg_1[2] = {0x2A, 0x01};
 
-	//uint16_t hello_count = 0;
-	//char hello_world[30] = {0};
+	char hello_world[30] = {0};
 	
 	// Enable ACTIVE mode of accelerometer
 	i2c0().write(0x1D, &ctrl_reg_1[0], 2, nullptr, false);
@@ -201,8 +157,8 @@ void task_2(void *pvParameters)
 			led2_status = true;
 		}
 		
-		//sprintf(&hello_world[0], "Hello, World! %d\r\n", x);
-		//uart0().write((uint8_t *)&hello_world[0], sizeof(hello_world));
+		sprintf(&hello_world[0], "Hello, World! %d\r\n", x);
+		uart0().write((uint8_t *)&hello_world[0], sizeof(hello_world));
 		
 		vTaskDelay(pdMS_TO_TICKS(250));
 	}
@@ -689,15 +645,15 @@ int main()
 	// Clear all rows
 	NRF_GPIO->OUTCLR = (1 << ROW1) | (1 << ROW2) | (1 << ROW3);
 	
-	if (pdPASS != xTaskCreate(task_1, "Task 1", 100, NULL, 1, NULL))
+	if (pdPASS != xTaskCreate(task_1, "Task 1", 128, NULL, 1, NULL))
 	{
 		APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
 	}
 	
-	/*if (pdPASS != xTaskCreate(task_2, "Task 2", 100, NULL, 1, NULL))
+	if (pdPASS != xTaskCreate(task_2, "Task 2", 128, NULL, 1, NULL))
 	{
 		APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-	}*/
+	}
 	
 	vTaskStartScheduler();
 

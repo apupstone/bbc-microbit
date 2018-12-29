@@ -31,6 +31,8 @@ SPIMaster::SPIMaster(const SPIConfig& conf)
 	// Enable interrupt sources
 	m_conf.periph->INTENSET = SPI_INTENSET_READY_Msk;
 	
+	sd_nvic_SetPriority((IRQn_Type)(((uint32_t)m_conf.periph & 0x0000FFFF) >> 12), 1);
+	
 	// Enable interrupt in the NVIC
 	// Must use sd_nvic_EnableIRQ to play nicely with the SoftDevice
 	sd_nvic_EnableIRQ((IRQn_Type)(((uint32_t)m_conf.periph & 0x0000FFFF) >> 12));
